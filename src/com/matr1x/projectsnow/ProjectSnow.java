@@ -2,8 +2,14 @@ package com.matr1x.projectsnow;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
+
+import com.matr1x.projectsnow.graphics.Screen;
 
 public class ProjectSnow extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -16,10 +22,16 @@ public class ProjectSnow extends Canvas implements Runnable {
 	private JFrame frame;
 	private boolean running = false;
 	
+	private Screen screen;
+	
+	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+	private int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+	
 	public ProjectSnow() {
 		Dimension size = new Dimension(width * scale, height * scale);
 		setPreferredSize(size);
 		
+		screen = new Screen(width, height);
 		frame = new JFrame();
 	}
 	
@@ -41,8 +53,34 @@ public class ProjectSnow extends Canvas implements Runnable {
 	
 	public void run() {
 		while(running) {
-			
+			update();
+			render();
 		}
+		
+	}
+	
+	public void update() {
+		
+	}
+	
+	public void render() {
+		BufferStrategy bs = getBufferStrategy();
+		if(bs == null) {
+			createBufferStrategy(3);
+			return;
+		}
+		
+		screen.clear();
+		screen.render();
+		
+		for(int i = 0; i < pixels.length; i++) {
+			pixels[i] = screen.pixels[i];
+		}
+		
+		Graphics g = bs.getDrawGraphics();
+		g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+		g.dispose();
+		bs.show();
 		
 	}
 	
